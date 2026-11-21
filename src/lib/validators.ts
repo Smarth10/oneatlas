@@ -19,3 +19,20 @@ export const modelsQuerySchema = z.object({
 });
 
 export type ModelsQuery = z.infer<typeof modelsQuerySchema>;
+
+export const compareQuerySchema = z.object({
+  models: z
+    .string()
+    .transform((s) => [...new Set(s.split(",").map((x) => x.trim()).filter(Boolean))])
+    .pipe(z.array(z.string()).min(2, "Select at least 2 models").max(4, "Select at most 4 models")),
+});
+
+export const rankingsQuerySchema = z.object({
+  benchmark: optStr,
+  category: optStr,
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export const searchQuerySchema = z.object({
+  q: z.string().trim().min(1, "Query is required").max(100),
+});

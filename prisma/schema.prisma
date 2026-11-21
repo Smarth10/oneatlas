@@ -1,15 +1,94 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ModelType {
+  LLM
+  IMAGE
+  EMBEDDING
+  AUDIO
+  MULTIMODAL
+}
+
+model Lab {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String
+  website     String
+  country     String?
+  models      Model[]
+}
+
+model Provider {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String
+  website     String
+  models      ModelProvider[]
+}
+
+model Model {
+  id               String           @id @default(cuid())
+  labId            String
+  lab              Lab              @relation(fields: [labId], references: [id], onDelete: Cascade)
+  name             String
+  slug             String           @unique
+  type             ModelType
+  description      String
+  contextWindow    Int
+  releaseDate      DateTime
+  inputModalities  String[]
+  outputModalities String[]
+  capabilities     String[]
+  minInputPrice    Float? // denormalized: cheapest provider input price, for fast sorting
+  providers        ModelProvider[]
+  scores           BenchmarkScore[]
+
+  @@index([labId])
+  @@index([type])
+  @@index([releaseDate])
+  @@index([contextWindow])
+  @@index([minInputPrice])
+}
+
+model ModelProvider {
+  modelId         String
+  providerId      String
+  model           Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  inputPricePerM  Float
+  outputPricePerM Float
+
+  @@id([modelId, providerId])
+  @@index([providerId])
+}
+
+model Benchmark {
+  id       String           @id @default(cuid())
+  name     String
+  slug     String           @unique
+  category String
+  maxScore Float            @default(100)
+  scores   BenchmarkScore[]
+
+  @@index([category])
+}
+
+model BenchmarkScore {
+  modelId     String
+  benchmarkId String
+  model       Model     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  benchmark   Benchmark @relation(fields: [benchmarkId], references: [id], onDelete: Cascade)
+  score       Float
+
+  @@id([modelId, benchmarkId])
+  @@index([benchmarkId, score])
 }

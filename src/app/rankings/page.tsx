@@ -8,6 +8,9 @@ import EmptyState from "@/components/EmptyState";
 
 export const metadata: Metadata = { title: "Rankings" };
 
+// model types that have benchmark scores in the seed data
+const RANKED_TYPES = ["LLM", "MULTIMODAL"];
+
 export default async function RankingsPage({
   searchParams,
 }: {
@@ -17,10 +20,12 @@ export default async function RankingsPage({
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
   const benchmark = first(raw.benchmark);
   const category = first(raw.category);
+  const type = first(raw.type);
 
   const qs = new URLSearchParams();
   if (benchmark) qs.set("benchmark", benchmark);
   if (category) qs.set("category", category);
+  if (type) qs.set("type", type);
 
   const [ranking, filters] = await Promise.all([
     apiGet<{ data: RankingRow[]; total: number }>(`/api/rankings?${qs.toString()}`),
@@ -36,11 +41,17 @@ export default async function RankingsPage({
       <div>
         <h1 className="text-2xl font-bold">Rankings</h1>
         <p className="text-sm text-slate-500">
-          Leaderboard by <span className="font-medium text-slate-700">{scoreLabel}</span> · {ranking.total} models
+          Leaderboard by <span className="font-medium text-slate-700">{scoreLabel}</span>
+          {type ? ` · ${type} models` : ""} · {ranking.total} models
         </p>
       </div>
 
-      <RankingsFilter benchmarks={filters.data.benchmarks} categories={filters.data.categories} current={{ benchmark, category }} />
+      <RankingsFilter
+        benchmarks={filters.data.benchmarks}
+        categories={filters.data.categories}
+        types={RANKED_TYPES}
+        current={{ benchmark, category, type }}
+      />
 
       {rows.length === 0 ? (
         <EmptyState title="No scores found" message="No models have scores for this selection." href="/rankings" cta="Reset" />

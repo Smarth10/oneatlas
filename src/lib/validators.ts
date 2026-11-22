@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 // Treats empty strings as "not provided"
 const optStr = z
@@ -28,6 +28,7 @@ export const compareQuerySchema = z.object({
 });
 
 export const rankingsQuerySchema = z.object({
+  type: z.enum(["LLM", "IMAGE", "EMBEDDING", "AUDIO", "MULTIMODAL"]).optional(),
   benchmark: optStr,
   category: optStr,
   limit: z.coerce.number().int().min(1).max(100).default(50),

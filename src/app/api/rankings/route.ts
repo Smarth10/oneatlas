@@ -5,7 +5,7 @@ import { rankingsQuerySchema } from "@/lib/validators";
 
 export async function GET(req: NextRequest) {
   try {
-    const { benchmark, category, limit } = rankingsQuerySchema.parse(
+    const { benchmark, category, type, limit } = rankingsQuerySchema.parse(
       Object.fromEntries(req.nextUrl.searchParams)
     );
 
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
           ...(benchmark && { slug: benchmark }),
           ...(category && { category }),
         },
+        ...(type && { model: { type } }),
       },
       include: {
         benchmark: { select: { name: true, slug: true, category: true } },

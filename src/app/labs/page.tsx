@@ -3,6 +3,7 @@ import Link from "next/link";
 import { apiGet } from "@/lib/api-client";
 import type { LabSummary } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "AI Labs" };
 
 export default async function LabsPage() {

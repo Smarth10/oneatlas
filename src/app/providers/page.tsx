@@ -3,6 +3,7 @@ import Link from "next/link";
 import { apiGet } from "@/lib/api-client";
 import type { ProviderSummary } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Providers" };
 
 export default async function ProvidersPage() {

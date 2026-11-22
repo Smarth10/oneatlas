@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { handleError } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const [labs, providers, benchmarks, capRows] = await Promise.all([
